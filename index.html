@@ -1,0 +1,1276 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulatore Footfall 2027 - Poltronesofà</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+        }
+        
+        .header h1 {
+            font-size: 1.8em;
+            background: linear-gradient(90deg, #e94560, #f39c12);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #8892b0;
+        }
+        
+        .main-container {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 20px;
+            max-width: 1700px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .card h2 {
+            color: #e94560;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .investment-panel {
+            position: sticky;
+            top: 20px;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        
+        .date-selector {
+            background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+            border: 1px solid #3b82f6;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .date-selector h3 {
+            color: #3b82f6;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .mmm-params {
+            background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.2));
+            border: 1px solid #10b981;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .mmm-params h3 {
+            color: #10b981;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .mmm-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .mmm-field {
+            background: rgba(255,255,255,0.05);
+            padding: 8px;
+            border-radius: 8px;
+        }
+        
+        .mmm-field label {
+            display: block;
+            font-size: 0.7em;
+            color: #8892b0;
+            margin-bottom: 4px;
+        }
+        
+        .mmm-field .input-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .mmm-field input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 0.85em;
+            text-align: right;
+        }
+        
+        .mmm-field .unit {
+            color: #64ffda;
+            font-size: 0.8em;
+        }
+        
+        .mmm-field.positive input { border-color: rgba(78,205,196,0.5); }
+        .mmm-field.negative input { border-color: rgba(255,107,107,0.5); }
+        .mmm-field.neutral input { border-color: rgba(148,163,184,0.5); }
+        
+        .mmm-total {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+        
+        .mmm-total .value {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .mmm-total .value.valid { color: #4ecdc4; }
+        .mmm-total .value.invalid { color: #ff6b6b; }
+        
+        .date-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .date-field label {
+            display: block;
+            font-size: 0.8em;
+            color: #8892b0;
+            margin-bottom: 5px;
+        }
+        
+        .date-field input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 0.85em;
+        }
+        
+        .period-info {
+            background: rgba(255,255,255,0.05);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            text-align: center;
+        }
+        
+        .period-info .weeks {
+            color: #64ffda;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .input-group {
+            margin-bottom: 8px;
+        }
+        
+        .input-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+            font-size: 0.75em;
+            color: #ccd6f6;
+        }
+        
+        .input-group label .cpf {
+            color: #64ffda;
+            font-size: 0.75em;
+        }
+        
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .input-wrapper input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .input-wrapper input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e94560;
+            cursor: pointer;
+        }
+        
+        .input-wrapper input[type="number"] {
+            width: 90px;
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 0.8em;
+            text-align: right;
+        }
+        
+        .channel-category {
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .channel-category h3 {
+            font-size: 0.8em;
+            color: #f39c12;
+            margin-bottom: 8px;
+        }
+        
+        .total-budget {
+            background: linear-gradient(135deg, #e94560, #f39c12);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .total-budget .label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+        
+        .total-budget .value {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        
+        .reset-btn {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        
+        .reset-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .period-comparison {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .period-card {
+            background: rgba(255,255,255,0.03);
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+        }
+        
+        .period-card.current { border-color: #f39c12; }
+        .period-card.yoy1 { border-color: #3b82f6; }
+        .period-card.yoy2 { border-color: #8b5cf6; }
+        
+        .period-card .period-label {
+            font-size: 0.75em;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .period-card .period-dates {
+            font-size: 0.85em;
+            color: #8892b0;
+            margin-bottom: 8px;
+        }
+        
+        .period-card .period-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .period-card.current .period-value { color: #f39c12; }
+        .period-card.yoy1 .period-value { color: #3b82f6; }
+        .period-card.yoy2 .period-value { color: #8b5cf6; }
+        
+        .period-card .period-change {
+            margin-top: 6px;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        
+        .period-card .period-change.positive { color: #4ecdc4; }
+        .period-card .period-change.negative { color: #ff6b6b; }
+        
+        .scenario-row {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .scenario-card {
+            background: rgba(255,255,255,0.03);
+            border: 2px solid;
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+        }
+        
+        .scenario-card.pessimistic { border-color: #ff6b6b; }
+        .scenario-card.base { border-color: #f39c12; }
+        .scenario-card.optimistic { border-color: #4ecdc4; }
+        
+        .scenario-card .scenario-label {
+            font-size: 0.65em;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+        
+        .scenario-card .scenario-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin: 4px 0;
+        }
+        
+        .scenario-card.pessimistic .scenario-value { color: #ff6b6b; }
+        .scenario-card.base .scenario-value { color: #f39c12; }
+        .scenario-card.optimistic .scenario-value { color: #4ecdc4; }
+        
+        .scenario-card .scenario-change {
+            font-size: 0.85em;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .kpi {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .kpi-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #64ffda;
+        }
+        
+        .kpi-label {
+            font-size: 0.7em;
+            color: #8892b0;
+            margin-top: 2px;
+        }
+        
+        .breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75em;
+        }
+        
+        .breakdown-table th,
+        .breakdown-table td {
+            padding: 7px 5px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .breakdown-table th {
+            color: #e94560;
+        }
+        
+        .breakdown-table td:not(:first-child) {
+            text-align: right;
+        }
+        
+        .breakdown-table tr:last-child {
+            font-weight: bold;
+            border-top: 2px solid #e94560;
+        }
+        
+        .highlight-result {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(233,69,96,0.15), rgba(243,156,18,0.15));
+            border: 2px solid #f39c12;
+            text-align: center;
+            padding: 18px;
+        }
+        
+        .highlight-result h3 {
+            color: #f39c12;
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+        
+        .highlight-result .big-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .highlight-result .subtitle {
+            color: #8892b0;
+            margin-top: 5px;
+            font-size: 0.85em;
+        }
+        
+        .footnote {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #8892b0;
+            font-size: 0.7em;
+            padding: 10px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+        }
+        
+        .comparison-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            margin-top: 4px;
+        }
+        
+        .comparison-badge.vs-yoy2 { background: rgba(139,92,246,0.3); }
+        
+        .decomposition-card {
+            grid-column: 1 / -1;
+        }
+        
+        .decomposition-bars {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .decomp-item {
+            text-align: center;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            min-width: 75px;
+        }
+        
+        .decomp-item .value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .decomp-item .label {
+            font-size: 0.65em;
+            color: #8892b0;
+            margin-top: 3px;
+        }
+        
+        .decomp-item.baseline .value { color: #64748b; }
+        .decomp-item.promo .value { color: #f39c12; }
+        .decomp-item.distribution .value { color: #a855f7; }
+        .decomp-item.media .value { color: #3b82f6; }
+        .decomp-item.meteo .value { color: #06b6d4; }
+        .decomp-item.erosion .value { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎛️ Simulatore Footfall 2027 - Poltronesofà</h1>
+        <p>Personalizza periodo, investimenti e parametri MMM per stimare il footfall</p>
+    </div>
+    
+    <div class="main-container">
+        <!-- Pannello Sinistro -->
+        <div class="investment-panel card">
+            <!-- Selettore Date -->
+            <div class="date-selector">
+                <h3>📅 Periodo Campagna 2027</h3>
+                <div class="date-row">
+                    <div class="date-field">
+                        <label>Data Inizio</label>
+                        <input type="date" id="startDate" value="2027-01-04" min="2027-01-01" max="2027-12-31">
+                    </div>
+                    <div class="date-field">
+                        <label>Data Fine</label>
+                        <input type="date" id="endDate" value="2027-02-28" min="2027-01-01" max="2027-12-31">
+                    </div>
+                </div>
+                <div class="period-info">
+                    Durata: <span class="weeks" id="weekCount">8</span> settimane
+                </div>
+            </div>
+            
+            <!-- Parametri MMM -->
+            <div class="mmm-params">
+                <h3>🔬 Parametri MMM</h3>
+                <div class="mmm-grid">
+                    <div class="mmm-field positive">
+                        <label>Baseline</label>
+                        <div class="input-row">
+                            <input type="number" id="mmm_baseline" value="72" min="0" max="100" step="1">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="mmm-field positive">
+                        <label>Promo Impact</label>
+                        <div class="input-row">
+                            <input type="number" id="mmm_promo" value="10" min="0" max="50" step="1">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="mmm-field neutral">
+                        <label>Distribuzione</label>
+                        <div class="input-row">
+                            <input type="number" id="mmm_distribution" value="0" min="-20" max="20" step="1">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="mmm-field negative">
+                        <label>Erosione Competitor</label>
+                        <div class="input-row">
+                            <input type="number" id="mmm_erosion" value="-5" min="-30" max="0" step="1">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="mmm-field negative">
+                        <label>Impatto Meteo</label>
+                        <div class="input-row">
+                            <input type="number" id="mmm_meteo" value="-3" min="-20" max="10" step="1">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="mmm-total">
+                        <span style="color:#8892b0; font-size:0.75em;">Media contributo = </span>
+                        <span class="value" id="mmmMediaContrib">26%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h2>💰 Investimenti Media</h2>
+            
+            <div class="channel-category">
+                <h3>📺 TV & Video</h3>
+                <div class="input-group">
+                    <label>TV Lineare <span class="cpf">CPF: €9.50</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="tv_slider" min="0" max="5000000" step="10000" value="2210000">
+                        <input type="number" id="tv_input" value="2210000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Cinema <span class="cpf">CPF: €9.50</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="cinema_slider" min="0" max="1000000" step="10000" value="200000">
+                        <input type="number" id="cinema_input" value="200000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>CTV <span class="cpf">CPF: €18.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="ctv_slider" min="0" max="2000000" step="10000" value="600000">
+                        <input type="number" id="ctv_input" value="600000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>YouTube <span class="cpf">CPF: €18.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="youtube_slider" min="0" max="1000000" step="10000" value="300000">
+                        <input type="number" id="youtube_input" value="300000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>VOL <span class="cpf">CPF: €18.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="vol_slider" min="0" max="1000000" step="10000" value="400000">
+                        <input type="number" id="vol_input" value="400000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Social Video <span class="cpf">CPF: €18.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="socialvideo_slider" min="0" max="1000000" step="10000" value="280000">
+                        <input type="number" id="socialvideo_input" value="280000">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="channel-category">
+                <h3>📻 Audio</h3>
+                <div class="input-group">
+                    <label>Radio <span class="cpf">CPF: €8.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="radio_slider" min="0" max="2000000" step="10000" value="650000">
+                        <input type="number" id="radio_input" value="650000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Digital Audio <span class="cpf">CPF: €8.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="digitalaudio_slider" min="0" max="2000000" step="10000" value="600000">
+                        <input type="number" id="digitalaudio_input" value="600000">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="channel-category">
+                <h3>💻 Digital & Social</h3>
+                <div class="input-group">
+                    <label>Digital Display <span class="cpf">CPF: €14.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="digital_slider" min="0" max="2000000" step="10000" value="490000">
+                        <input type="number" id="digital_input" value="490000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Social <span class="cpf">CPF: €14.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="social_slider" min="0" max="2000000" step="10000" value="700000">
+                        <input type="number" id="social_input" value="700000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Search <span class="cpf">CPF: €14.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="search_slider" min="0" max="1000000" step="10000" value="320000">
+                        <input type="number" id="search_input" value="320000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Progetto Play <span class="cpf">CPF: €14.00</span></label>
+                    <div class="input-wrapper">
+                        <input type="range" id="play_slider" min="0" max="1000000" step="10000" value="250000">
+                        <input type="number" id="play_input" value="250000">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="total-budget">
+                <div class="label">BUDGET PERIODO</div>
+                <div class="value" id="totalBudget">€7,000,000</div>
+            </div>
+            
+            <button class="reset-btn" onclick="resetToDefault()">🔄 Reset valori iniziali</button>
+        </div>
+        
+        <!-- Risultati -->
+        <div class="results-grid">
+            <!-- Confronto Periodi Omologhi -->
+            <div class="period-comparison">
+                <div class="period-card yoy2">
+                    <div class="period-label">PERIODO OMOLOGO 2025</div>
+                    <div class="period-dates" id="yoy2Dates">6 Gen - 1 Mar 2025</div>
+                    <div class="period-value" id="yoy2Value">377,871</div>
+                    <div class="period-change" id="yoy2Change">Baseline storico</div>
+                </div>
+                <div class="period-card yoy1">
+                    <div class="period-label">PERIODO OMOLOGO 2026</div>
+                    <div class="period-dates" id="yoy1Dates">4 Gen - 28 Feb 2026</div>
+                    <div class="period-value" id="yoy1Value">349,670</div>
+                    <div class="period-change" id="yoy1Change">-7.5% vs 2025</div>
+                </div>
+                <div class="period-card current">
+                    <div class="period-label">STIMA 2027 (BASE)</div>
+                    <div class="period-dates" id="currentDates">4 Gen - 28 Feb 2027</div>
+                    <div class="period-value" id="currentValue">456,892</div>
+                    <div class="period-change positive" id="currentChangeYoy1">+30.7% vs 2026</div>
+                    <span class="comparison-badge vs-yoy2" id="currentChangeYoy2">+20.9% vs 2025</span>
+                </div>
+            </div>
+            
+            <!-- Decomposizione -->
+            <div class="card decomposition-card">
+                <h2>🧩 Decomposizione Footfall Stimato</h2>
+                <div class="decomposition-bars">
+                    <div class="decomp-item baseline">
+                        <div class="value" id="decompBaseline">262,456</div>
+                        <div class="label">Baseline</div>
+                    </div>
+                    <div class="decomp-item promo">
+                        <div class="value" id="decompPromo">36,454</div>
+                        <div class="label">Promo</div>
+                    </div>
+                    <div class="decomp-item distribution">
+                        <div class="value" id="decompDistribution">0</div>
+                        <div class="label">Distribuzione</div>
+                    </div>
+                    <div class="decomp-item media">
+                        <div class="value" id="decompMedia">623,426</div>
+                        <div class="label">Media</div>
+                    </div>
+                    <div class="decomp-item meteo">
+                        <div class="value" id="decompMeteo">-10,936</div>
+                        <div class="label">Meteo</div>
+                    </div>
+                    <div class="decomp-item erosion">
+                        <div class="value" id="decompErosion">-18,227</div>
+                        <div class="label">Erosione</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scenari -->
+            <div class="scenario-row">
+                <div class="scenario-card pessimistic">
+                    <div class="scenario-label">PESSIMISTICO</div>
+                    <div class="scenario-value" id="pessimisticValue">398,234</div>
+                    <div class="scenario-change" id="pessimisticVs2026">+13.9% vs 2026</div>
+                </div>
+                <div class="scenario-card base">
+                    <div class="scenario-label">SCENARIO BASE</div>
+                    <div class="scenario-value" id="baseValue">456,892</div>
+                    <div class="scenario-change" id="baseVs2026">+30.7% vs 2026</div>
+                </div>
+                <div class="scenario-card optimistic">
+                    <div class="scenario-label">OTTIMISTICO</div>
+                    <div class="scenario-value" id="optimisticValue">521,456</div>
+                    <div class="scenario-change" id="optimisticVs2026">+49.1% vs 2026</div>
+                </div>
+            </div>
+            
+            <!-- KPI -->
+            <div class="card">
+                <h2>📊 KPI Periodo</h2>
+                <div class="kpi-grid">
+                    <div class="kpi">
+                        <div class="kpi-value" id="mediaFootfall">623,426</div>
+                        <div class="kpi-label">Footfall da Media</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-value" id="avgCPF">€11.23</div>
+                        <div class="kpi-label">CPF Medio</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-value" id="incrementVsYoy1">+30.7%</div>
+                        <div class="kpi-label">Δ vs 2026</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-value" id="incrementVsYoy2">+20.9%</div>
+                        <div class="kpi-label">Δ vs 2025</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Breakdown -->
+            <div class="card">
+                <h2>📈 Breakdown Investimenti</h2>
+                <table class="breakdown-table">
+                    <thead>
+                        <tr>
+                            <th>Cluster</th>
+                            <th>Budget</th>
+                            <th>Footfall</th>
+                            <th>%</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>📺 TV + Cinema</td>
+                            <td id="tvBudget">€2.41M</td>
+                            <td id="tvFootfall">253,684</td>
+                            <td id="tvPct">40.7%</td>
+                        </tr>
+                        <tr>
+                            <td>📱 Video</td>
+                            <td id="videoBudget">€1.58M</td>
+                            <td id="videoFootfall">87,778</td>
+                            <td id="videoPct">14.1%</td>
+                        </tr>
+                        <tr>
+                            <td>📻 Audio</td>
+                            <td id="audioBudget">€1.25M</td>
+                            <td id="audioFootfall">156,250</td>
+                            <td id="audioPct">25.1%</td>
+                        </tr>
+                        <tr>
+                            <td>💻 Digital</td>
+                            <td id="digitalBudget">€1.76M</td>
+                            <td id="digitalFootfall">125,714</td>
+                            <td id="digitalPct">20.2%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TOTALE</strong></td>
+                            <td id="totalBudgetTable"><strong>€7.00M</strong></td>
+                            <td id="totalFootfallTable"><strong>623,426</strong></td>
+                            <td><strong>100%</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Chart Contributo -->
+            <div class="card">
+                <h2>🥧 Contributo per Canale</h2>
+                <div class="chart-container">
+                    <canvas id="contributionChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Chart Efficienza -->
+            <div class="card">
+                <h2>⚡ Efficienza per €100k</h2>
+                <div class="chart-container">
+                    <canvas id="efficiencyChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Highlight -->
+            <div class="card highlight-result">
+                <h3>🎯 STIMA FOOTFALL PERIODO SELEZIONATO (Scenario Base)</h3>
+                <div class="big-number" id="highlightNumber">456,892</div>
+                <div class="subtitle" id="highlightSubtitle">Gen-Feb 2027 | +30.7% vs 2026 | +20.9% vs 2025</div>
+            </div>
+            
+            <!-- Footnote -->
+            <div class="footnote">
+                ⚠️ <strong>Note:</strong> Parametri MMM personalizzabili. Periodi omologhi calcolati su settimane ISO. 
+                Dati storici 2024-2026. CPF stimati da benchmark retail arredamento.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Dati storici
+        const historicalData = {
+            2024: {
+                1: 63312, 2: 64432, 3: 66013, 4: 77430, 5: 57956, 6: 48718, 7: 51576, 8: 56047,
+                9: 59175, 10: 36505, 11: 41298, 12: 36063, 13: 25733, 14: 37886, 15: 33357, 16: 38316,
+                17: 40941, 18: 37399, 19: 30308, 20: 29771, 21: 30458, 22: 31201, 23: 28271, 24: 27781,
+                25: 24073, 26: 22636, 27: 27830, 28: 30107, 29: 32001, 30: 31785, 31: 26370, 32: 26653,
+                33: 26966, 34: 36720, 35: 27370, 36: 38794, 37: 46434, 38: 49238, 39: 38913, 40: 40797,
+                41: 40280, 42: 47379, 43: 42832, 44: 44338, 45: 46052, 46: 46524, 47: 45256, 48: 48340,
+                49: 27658, 50: 25069, 51: 22164, 52: 23612
+            },
+            2025: {
+                1: 53807, 2: 59541, 3: 63695, 4: 49805, 5: 58373, 6: 46688, 7: 39758, 8: 50011,
+                9: 50197, 10: 30703, 11: 38072, 12: 34857, 13: 32005, 14: 30246, 15: 29003, 16: 20349,
+                17: 31591, 18: 28853, 19: 28167, 20: 28724, 21: 27243, 22: 23836, 23: 22046, 24: 17850,
+                25: 17378, 26: 16524, 27: 21092, 28: 28925, 29: 27239, 30: 29786, 31: 31954, 32: 25897,
+                33: 23569, 34: 41634, 35: 28608, 36: 32592, 37: 33814, 38: 31917, 39: 32375, 40: 33110,
+                41: 33724, 42: 34642, 43: 32817, 44: 32031, 45: 32490, 46: 37426, 47: 37988, 48: 41878,
+                49: 24938, 50: 23254, 51: 17002, 52: 18147
+            },
+            2026: {
+                1: 51365, 2: 60760, 3: 50812, 4: 42331, 5: 43775, 6: 36155, 7: 34946, 8: 39481,
+                9: 39409, 10: 25486, 11: 32566, 12: 32665, 13: 27531, 14: 17845, 15: 24103, 16: 23692,
+                17: 21889, 18: 22593, 19: 23472, 20: 25204, 21: 20984, 22: 19119, 23: 22218, 24: 16182,
+                25: 13810, 26: 13213, 27: 18228, 28: 22575, 29: 22950, 30: 22827, 31: 21860, 32: 21385,
+                33: 18877, 34: 31894, 35: 26856
+            }
+        };
+        
+        const channels = {
+            tv: { cpf: 9.5, cluster: 'tv' },
+            cinema: { cpf: 9.5, cluster: 'tv' },
+            ctv: { cpf: 18, cluster: 'video' },
+            youtube: { cpf: 18, cluster: 'video' },
+            vol: { cpf: 18, cluster: 'video' },
+            socialvideo: { cpf: 18, cluster: 'video' },
+            radio: { cpf: 8, cluster: 'audio' },
+            digitalaudio: { cpf: 8, cluster: 'audio' },
+            digital: { cpf: 14, cluster: 'digital' },
+            social: { cpf: 14, cluster: 'digital' },
+            search: { cpf: 14, cluster: 'digital' },
+            play: { cpf: 14, cluster: 'digital' }
+        };
+        
+        const defaultValues = {
+            tv: 2210000, cinema: 200000, ctv: 600000, youtube: 300000,
+            vol: 400000, socialvideo: 280000, radio: 650000, digitalaudio: 600000,
+            digital: 490000, social: 700000, search: 320000, play: 250000
+        };
+        
+        const defaultMMM = {
+            baseline: 72,
+            promo: 10,
+            distribution: 0,
+            erosion: -5,
+            meteo: -3
+        };
+        
+        let contributionChart, efficiencyChart;
+        
+        function getISOWeek(date) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(), 0, 1);
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        
+        function getWeeksInRange(startDate, endDate) {
+            const weeks = [];
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            let current = new Date(start);
+            while (current <= end) {
+                weeks.push(getISOWeek(current));
+                current.setDate(current.getDate() + 7);
+            }
+            return [...new Set(weeks)];
+        }
+        
+        function getFootfallForPeriod(year, weeks) {
+            const data = historicalData[year];
+            if (!data) return null;
+            let total = 0;
+            let validWeeks = 0;
+            weeks.forEach(week => {
+                if (data[week]) {
+                    total += data[week];
+                    validWeeks++;
+                }
+            });
+            return validWeeks > 0 ? { total, weeks: validWeeks } : null;
+        }
+        
+        function formatNumber(num) {
+            return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        function formatCurrency(num) {
+            if (num >= 1000000) return '€' + (num / 1000000).toFixed(2) + 'M';
+            if (num >= 1000) return '€' + (num / 1000).toFixed(0) + 'K';
+            return '€' + num;
+        }
+        
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+            return d.getDate() + ' ' + months[d.getMonth()];
+        }
+        
+        function initCharts() {
+            contributionChart = new Chart(document.getElementById('contributionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['TV + Cinema', 'Video', 'Audio', 'Digital'],
+                    datasets: [{
+                        data: [40, 14, 25, 20],
+                        backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#8892b0', font: { size: 9 } } }
+                    }
+                }
+            });
+            
+            efficiencyChart = new Chart(document.getElementById('efficiencyChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Audio', 'TV', 'Digital', 'Video'],
+                    datasets: [{
+                        data: [12500, 10526, 7143, 5556],
+                        backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8892b0', font: { size: 9 } } },
+                        y: { grid: { display: false }, ticks: { color: '#8892b0', font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+        
+        function setupSync(channelId) {
+            const slider = document.getElementById(`${channelId}_slider`);
+            const input = document.getElementById(`${channelId}_input`);
+            slider.addEventListener('input', () => { input.value = slider.value; recalculate(); });
+            input.addEventListener('input', () => { slider.value = input.value; recalculate(); });
+        }
+        
+        function setupMMMListeners() {
+            ['baseline', 'promo', 'distribution', 'erosion', 'meteo'].forEach(param => {
+                document.getElementById(`mmm_${param}`).addEventListener('input', recalculate);
+            });
+        }
+        
+        function getMMM() {
+            return {
+                baseline: parseFloat(document.getElementById('mmm_baseline').value) / 100 || 0.72,
+                promo: parseFloat(document.getElementById('mmm_promo').value) / 100 || 0.10,
+                distribution: parseFloat(document.getElementById('mmm_distribution').value) / 100 || 0,
+                erosion: parseFloat(document.getElementById('mmm_erosion').value) / 100 || -0.05,
+                meteo: parseFloat(document.getElementById('mmm_meteo').value) / 100 || -0.03
+            };
+        }
+        
+        function recalculate() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const mmm = getMMM();
+            
+            // Update media contribution display
+            const mediaContrib = Math.round((1 - mmm.baseline - mmm.promo - mmm.distribution + Math.abs(mmm.erosion) + Math.abs(mmm.meteo)) * 100);
+            const mmmMediaEl = document.getElementById('mmmMediaContrib');
+            mmmMediaEl.textContent = mediaContrib + '%';
+            mmmMediaEl.className = 'value ' + (mediaContrib > 0 && mediaContrib < 50 ? 'valid' : 'invalid');
+            
+            const weeks = getWeeksInRange(startDate, endDate);
+            document.getElementById('weekCount').textContent = weeks.length;
+            
+            const yoy1Data = getFootfallForPeriod(2026, weeks);
+            const yoy2Data = getFootfallForPeriod(2025, weeks);
+            
+            const startMonth = formatDate(startDate);
+            const endMonth = formatDate(endDate);
+            
+            document.getElementById('currentDates').textContent = `${startMonth} - ${endMonth} 2027`;
+            document.getElementById('yoy1Dates').textContent = `${startMonth} - ${endMonth} 2026`;
+            document.getElementById('yoy2Dates').textContent = `${startMonth} - ${endMonth} 2025`;
+            
+            const yoy1Total = yoy1Data ? yoy1Data.total : 0;
+            const yoy2Total = yoy2Data ? yoy2Data.total : 0;
+            
+            document.getElementById('yoy1Value').textContent = formatNumber(yoy1Total);
+            document.getElementById('yoy2Value').textContent = formatNumber(yoy2Total);
+            
+            if (yoy2Total > 0 && yoy1Total > 0) {
+                const yoy1VsYoy2 = ((yoy1Total / yoy2Total - 1) * 100).toFixed(1);
+                document.getElementById('yoy1Change').textContent = (yoy1VsYoy2 >= 0 ? '+' : '') + yoy1VsYoy2 + '% vs 2025';
+                document.getElementById('yoy1Change').className = 'period-change ' + (yoy1VsYoy2 >= 0 ? 'positive' : 'negative');
+            }
+            
+            // Investimenti
+            const values = {};
+            for (const channel in channels) {
+                values[channel] = parseInt(document.getElementById(`${channel}_input`).value) || 0;
+            }
+            
+            const clusters = {
+                tv: { budget: 0, footfall: 0 },
+                video: { budget: 0, footfall: 0 },
+                audio: { budget: 0, footfall: 0 },
+                digital: { budget: 0, footfall: 0 }
+            };
+            
+            let totalBudget = 0;
+            let totalMediaFootfall = 0;
+            
+            for (const channel in channels) {
+                const budget = values[channel];
+                const cpf = channels[channel].cpf;
+                const cluster = channels[channel].cluster;
+                const footfall = budget / cpf;
+                
+                clusters[cluster].budget += budget;
+                clusters[cluster].footfall += footfall;
+                totalBudget += budget;
+                totalMediaFootfall += footfall;
+            }
+            
+            document.getElementById('totalBudget').textContent = formatCurrency(totalBudget);
+            
+            // Calcoli con parametri MMM personalizzati
+            const avgHistorical = yoy1Total > 0 && yoy2Total > 0 ? (yoy1Total + yoy2Total) / 2 : (yoy1Total || yoy2Total || 300000);
+            const trendFactor = yoy1Total > 0 && yoy2Total > 0 ? yoy1Total / yoy2Total : 0.93;
+            
+            const baselineFootfall = avgHistorical * mmm.baseline * Math.max(trendFactor, 0.90);
+            const promoImpact = avgHistorical * mmm.promo;
+            const distributionImpact = avgHistorical * mmm.distribution;
+            const meteoImpact = avgHistorical * mmm.meteo;
+            const erosionImpact = avgHistorical * mmm.erosion;
+            
+            // Decomposizione
+            document.getElementById('decompBaseline').textContent = formatNumber(Math.round(baselineFootfall));
+            document.getElementById('decompPromo').textContent = formatNumber(Math.round(promoImpact));
+            document.getElementById('decompDistribution').textContent = formatNumber(Math.round(distributionImpact));
+            document.getElementById('decompMedia').textContent = formatNumber(Math.round(totalMediaFootfall));
+            document.getElementById('decompMeteo').textContent = formatNumber(Math.round(meteoImpact));
+            document.getElementById('decompErosion').textContent = formatNumber(Math.round(erosionImpact));
+            
+            // Scenari
+            const erosionPessimistic = avgHistorical * (mmm.erosion * 1.5);
+            const erosionOptimistic = avgHistorical * (mmm.erosion * 0.4);
+            
+            const pessimistic = Math.round(baselineFootfall * 0.92 + promoImpact * 0.85 + distributionImpact * 0.90 + totalMediaFootfall * 0.80 + meteoImpact * 1.5 + erosionPessimistic);
+            const base = Math.round(baselineFootfall + promoImpact + distributionImpact + totalMediaFootfall + meteoImpact + erosionImpact);
+            const optimistic = Math.round(baselineFootfall * 1.05 + promoImpact * 1.10 + distributionImpact * 1.05 + totalMediaFootfall * 1.15 + meteoImpact * 0.5 + erosionOptimistic);
+            
+            document.getElementById('currentValue').textContent = formatNumber(base);
+            document.getElementById('pessimisticValue').textContent = formatNumber(pessimistic);
+            document.getElementById('baseValue').textContent = formatNumber(base);
+            document.getElementById('optimisticValue').textContent = formatNumber(optimistic);
+            
+            // Percentuali
+            if (yoy1Total > 0) {
+                const pctVsYoy1Base = ((base / yoy1Total - 1) * 100).toFixed(1);
+                const pctVsYoy1Pess = ((pessimistic / yoy1Total - 1) * 100).toFixed(1);
+                const pctVsYoy1Opt = ((optimistic / yoy1Total - 1) * 100).toFixed(1);
+                
+                document.getElementById('currentChangeYoy1').textContent = (pctVsYoy1Base >= 0 ? '+' : '') + pctVsYoy1Base + '% vs 2026';
+                document.getElementById('currentChangeYoy1').className = 'period-change ' + (pctVsYoy1Base >= 0 ? 'positive' : 'negative');
+                
+                document.getElementById('pessimisticVs2026').textContent = (pctVsYoy1Pess >= 0 ? '+' : '') + pctVsYoy1Pess + '% vs 2026';
+                document.getElementById('baseVs2026').textContent = (pctVsYoy1Base >= 0 ? '+' : '') + pctVsYoy1Base + '% vs 2026';
+                document.getElementById('optimisticVs2026').textContent = (pctVsYoy1Opt >= 0 ? '+' : '') + pctVsYoy1Opt + '% vs 2026';
+                
+                document.getElementById('incrementVsYoy1').textContent = (pctVsYoy1Base >= 0 ? '+' : '') + pctVsYoy1Base + '%';
+                document.getElementById('incrementVsYoy1').style.color = pctVsYoy1Base >= 0 ? '#4ecdc4' : '#ff6b6b';
+            }
+            
+            if (yoy2Total > 0) {
+                const pctVsYoy2 = ((base / yoy2Total - 1) * 100).toFixed(1);
+                document.getElementById('currentChangeYoy2').textContent = (pctVsYoy2 >= 0 ? '+' : '') + pctVsYoy2 + '% vs 2025';
+                document.getElementById('incrementVsYoy2').textContent = (pctVsYoy2 >= 0 ? '+' : '') + pctVsYoy2 + '%';
+                document.getElementById('incrementVsYoy2').style.color = pctVsYoy2 >= 0 ? '#4ecdc4' : '#ff6b6b';
+            }
+            
+            // KPI
+            document.getElementById('mediaFootfall').textContent = formatNumber(Math.round(totalMediaFootfall));
+            document.getElementById('avgCPF').textContent = totalMediaFootfall > 0 ? '€' + (totalBudget / totalMediaFootfall).toFixed(2) : '€0';
+            
+            // Breakdown
+            document.getElementById('tvBudget').textContent = formatCurrency(clusters.tv.budget);
+            document.getElementById('tvFootfall').textContent = formatNumber(Math.round(clusters.tv.footfall));
+            document.getElementById('tvPct').textContent = totalMediaFootfall > 0 ? (clusters.tv.footfall / totalMediaFootfall * 100).toFixed(1) + '%' : '0%';
+            
+            document.getElementById('videoBudget').textContent = formatCurrency(clusters.video.budget);
+            document.getElementById('videoFootfall').textContent = formatNumber(Math.round(clusters.video.footfall));
+            document.getElementById('videoPct').textContent = totalMediaFootfall > 0 ? (clusters.video.footfall / totalMediaFootfall * 100).toFixed(1) + '%' : '0%';
+            
+            document.getElementById('audioBudget').textContent = formatCurrency(clusters.audio.budget);
+            document.getElementById('audioFootfall').textContent = formatNumber(Math.round(clusters.audio.footfall));
+            document.getElementById('audioPct').textContent = totalMediaFootfall > 0 ? (clusters.audio.footfall / totalMediaFootfall * 100).toFixed(1) + '%' : '0%';
+            
+            document.getElementById('digitalBudget').textContent = formatCurrency(clusters.digital.budget);
+            document.getElementById('digitalFootfall').textContent = formatNumber(Math.round(clusters.digital.footfall));
+            document.getElementById('digitalPct').textContent = totalMediaFootfall > 0 ? (clusters.digital.footfall / totalMediaFootfall * 100).toFixed(1) + '%' : '0%';
+            
+            document.getElementById('totalBudgetTable').innerHTML = '<strong>' + formatCurrency(totalBudget) + '</strong>';
+            document.getElementById('totalFootfallTable').innerHTML = '<strong>' + formatNumber(Math.round(totalMediaFootfall)) + '</strong>';
+            
+            // Highlight
+            document.getElementById('highlightNumber').textContent = formatNumber(base);
+            const highlightPctYoy1 = yoy1Total > 0 ? ((base / yoy1Total - 1) * 100).toFixed(1) : 0;
+            const highlightPctYoy2 = yoy2Total > 0 ? ((base / yoy2Total - 1) * 100).toFixed(1) : 0;
+            document.getElementById('highlightSubtitle').textContent = 
+                `${startMonth} - ${endMonth} 2027 | ${highlightPctYoy1 >= 0 ? '+' : ''}${highlightPctYoy1}% vs 2026 | ${highlightPctYoy2 >= 0 ? '+' : ''}${highlightPctYoy2}% vs 2025`;
+            
+            // Charts
+            contributionChart.data.datasets[0].data = [
+                Math.round(clusters.tv.footfall),
+                Math.round(clusters.video.footfall),
+                Math.round(clusters.audio.footfall),
+                Math.round(clusters.digital.footfall)
+            ];
+            contributionChart.update();
+            
+            efficiencyChart.data.datasets[0].data = [
+                clusters.audio.budget > 0 ? Math.round(clusters.audio.footfall / clusters.audio.budget * 100000) : 0,
+                clusters.tv.budget > 0 ? Math.round(clusters.tv.footfall / clusters.tv.budget * 100000) : 0,
+                clusters.digital.budget > 0 ? Math.round(clusters.digital.footfall / clusters.digital.budget * 100000) : 0,
+                clusters.video.budget > 0 ? Math.round(clusters.video.footfall / clusters.video.budget * 100000) : 0
+            ];
+            efficiencyChart.update();
+        }
+        
+        function resetToDefault() {
+            for (const channel in defaultValues) {
+                document.getElementById(`${channel}_slider`).value = defaultValues[channel];
+                document.getElementById(`${channel}_input`).value = defaultValues[channel];
+            }
+            document.getElementById('startDate').value = '2027-01-04';
+            document.getElementById('endDate').value = '2027-02-28';
+            document.getElementById('mmm_baseline').value = defaultMMM.baseline;
+            document.getElementById('mmm_promo').value = defaultMMM.promo;
+            document.getElementById('mmm_distribution').value = defaultMMM.distribution;
+            document.getElementById('mmm_erosion').value = defaultMMM.erosion;
+            document.getElementById('mmm_meteo').value = defaultMMM.meteo;
+            recalculate();
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            for (const channel in channels) {
+                setupSync(channel);
+            }
+            setupMMMListeners();
+            document.getElementById('startDate').addEventListener('change', recalculate);
+            document.getElementById('endDate').addEventListener('change', recalculate);
+            recalculate();
+        });
+    </script>
+</body>
+</html>
